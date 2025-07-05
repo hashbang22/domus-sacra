@@ -1,0 +1,4 @@
+# Example cronjob for Domus Sacra
+# Runs daily at 00:00 AM
+
+0 0 * * * /path/to/domus-sacra/scripts/get_tlm_liturgical_color.sh >> /var/log/domus-sacra.log 2>&1
