@@ -9,8 +9,6 @@ TODAYS_DATE=$(date +"%Y-%m-%d")
 URL="https://www.missalemeum.com/en/$TODAYS_DATE"
 OUTPUT_DIR="$(dirname "$0")/../data"
 OUTPUT_FILE="$OUTPUT_DIR/tlm_liturgical_color_today"
-MQTT_HOST="${MQTT_HOST:-localhost}"
-MQTT_TOPIC="${MQTT_TOPIC:-1962liturgical/color}"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -24,5 +22,3 @@ else
     echo "Liturgical color for today ($TODAYS_DATE): $COLOR"
     echo "$COLOR" > "$OUTPUT_FILE"
 fi
-
-mosquitto_pub -h "$MQTT_HOST" -t "$MQTT_TOPIC" -m "$(cat "$OUTPUT_FILE")"
