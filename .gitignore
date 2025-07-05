@@ -1,0 +1,21 @@
+# Ignore output files and logs
+/data/*
+!/data/.gitkeep
+
+# Ignore secrets or local config (if added later)
+/.env
+/config.json
+
+# System files
+.DS_Store
+*.swp
+*.bak
+
+# Containers or build artifacts
+*.tar
+*.zip
+*.log
+
+# Python/Puppeteer-related (if used later)
+__pycache__/
+node_modules/
