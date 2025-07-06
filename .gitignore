@@ -19,3 +19,7 @@
 # Python/Puppeteer-related (if used later)
 __pycache__/
 node_modules/
+
+# Ignore all VS Code settings except launch configs
+.vscode/*
+!.vscode/launch.json

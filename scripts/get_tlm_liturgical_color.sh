@@ -20,5 +20,5 @@ if [ -z "$COLOR" ]; then
     exit 1
 else
     echo "Liturgical color for today ($TODAYS_DATE): $COLOR"
-    echo "$COLOR" > "$OUTPUT_FILE"
+    echo "{\"date\": \"$TODAYS_DATE\", \"color\": \"$COLOR\"}" > "$OUTPUT_FILE"
 fi
