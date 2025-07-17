@@ -23,3 +23,4 @@ node_modules/
 # Ignore all VS Code settings except launch configs
 .vscode/*
 !.vscode/launch.json
+*.code-workspace
