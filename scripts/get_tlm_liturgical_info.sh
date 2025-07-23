@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# get_tlm_liturgical_color.sh
-# Fetches liturgical color from Missale Meum and optionally outputs JSON
+# get_tlm_liturgical_info.sh
+# Fetches liturgical info from Missale Meum and optionally outputs JSON
 
 set -euo pipefail
 
