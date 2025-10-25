@@ -1,76 +1,37 @@
 #!/bin/bash
-#
-# get_tlm_liturgical_info.sh
-# Fetches liturgical info from Missale Meum and optionally outputs JSON
 
-set -euo pipefail
+# Usage: ./get_liturgical_info.sh [YYYY-MM-DD]
+# If no date is provided, it defaults to today.
 
-# Defaults
-JSON_FLAG=false
-PREVIEW_FLAG=false
-DATE=$(date +"%Y-%m-%d")
+DATE=${1:-$(date +%F)}
+API_URL="https://www.missalemeum.com/en/api/v5/proper/$DATE?variant=a4&index=0"
 
-# Handle arguments
-for arg in "$@"; do
-  case "$arg" in
-    --json)
-      JSON_FLAG=true
-      ;;
-    --preview)
-      PREVIEW_FLAG=true
-      ;;
-    --date=*)
-      DATE="${arg#--date=}"
-      ;;
-    *)
-      echo "Unknown option: $arg"
-      echo "Usage: $0 [--json] [--preview] [--date=YYYY-MM-DD]"
-      exit 1
-      ;;
-  esac
-done
+# Fetch data from Missale Meum API
+RESPONSE=$(curl -s -X GET -H "accept: application/json" "$API_URL")
 
-# Paths and filenames
-SCRIPT_DIR="$(dirname "$0")"
-OUTPUT_DIR="$SCRIPT_DIR/../data"
-DATE_FILE="$OUTPUT_DIR/tlm_liturgical_color_${DATE}.json"
-TODAY_FILE="$OUTPUT_DIR/tlm_liturgical_color_today.json"
-URL="https://www.missalemeum.com/en/$DATE"
-
-mkdir -p "$OUTPUT_DIR"
-
-# Fetch and parse
-PAGE_CONTENT=$(curl -s "$URL")
-COLOR=$(echo "$PAGE_CONTENT" | grep -oP '\b(White|Red|Green|Violet|Black|Rose|Gold)\b(?= vestments)')
-
-if [ -z "$COLOR" ]; then
-  echo "No vestment color found for $DATE."
+# Check if response is valid JSON
+if ! echo "$RESPONSE" | jq empty 2>/dev/null; then
+  echo "Error: API response is not valid JSON. Raw response:"
+  echo "$RESPONSE"
   exit 1
 fi
 
-# Construct JSON
-JSON_OUTPUT="{\"date\": \"$DATE\", \"color\": \"$COLOR\"}"
+# Extract raw color code and celebration title
+RAW_COLOR=$(echo "$RESPONSE" | jq -r '.[0].info.colors[0]')
+TITLE=$(echo "$RESPONSE" | jq -r '.[0].info.title')
 
-# Write files unless in preview mode
-if [ "$PREVIEW_FLAG" = false ]; then
-  echo "$JSON_OUTPUT" > "$DATE_FILE"
-  if [[ "$DATE" == "$(date +%Y-%m-%d)" ]]; then
-    echo "$JSON_OUTPUT" > "$TODAY_FILE"
-  fi
-fi
+# Map color code to full name
+case "$RAW_COLOR" in
+  w) COLOR="White" ;;
+  r) COLOR="Red" ;;
+  g) COLOR="Green" ;;
+  v) COLOR="Violet" ;;
+  b) COLOR="Black" ;;
+  p) COLOR="Rose" ;;
+  *) COLOR="Unknown ($RAW_COLOR)" ;;
+esac
 
-# Output to console
-if [ "$JSON_FLAG" = true ]; then
-  echo "$JSON_OUTPUT"
-else
-  echo "Liturgical color for $DATE: $COLOR"
-  if [ "$PREVIEW_FLAG" = false ]; then
-    echo "Saved:"
-    echo " - $DATE_FILE"
-    if [[ "$DATE" == "$(date +%Y-%m-%d)" ]]; then
-      echo " - $TODAY_FILE (canonical today snapshot)"
-    fi
-  else
-    echo "(Preview mode: no files written)"
-  fi
-fi
+# Output results
+echo "Date: $DATE"
+echo "Liturgical Color: $COLOR"
+echo "Celebration: $TITLE"
